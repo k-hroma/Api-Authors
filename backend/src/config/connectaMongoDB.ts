@@ -27,7 +27,6 @@ const connectMongoDB = async ():Promise<ConnectionResult> => {
     };
 
     await connect(URI_DB, options)
-    console.log("Successful MongoDB connection")
     return {
       success: true,
       message:"Successful connection"
