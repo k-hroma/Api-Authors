@@ -1,37 +1,8 @@
-import { connectMongoDB } from "./config/connectaMongoDB";
-import { Schema, model } from "mongoose";
-import express, { Response, Request, NextFunction } from 'express';
+// Controladores
+import { QueryResponse } from "../types/authorTypes"
+import { AuthorModel } from "../models/authorModel"
+import {Request, Response } from 'express'
 
-// 1. Definición de interfaces===================================================================
-interface IAuthor { 
-  firstName: string,
-  lastName: string,
-}
-
-interface QueryResponse { 
-  success: boolean,
-  message: string,
-  data?: IAuthor | IAuthor[] | null,
-  error?: string | null
-}
-
-// 2. Configuración de Express ==================================================================
-const PORT = process.env.PORT || 3000
-// Creación de la app
-const app = express()
-
-// 3. Modelo Mongoose ===========================================================================
-const authorSchema = new Schema<IAuthor>({
-  firstName: {type:String, required: true, trim: true, maxlength: 50},
-  lastName:{type:String, required: true, trim: true, maxlength: 50},
-}, {timestamps:true, versionKey:false})
-
-const AuthorModel = model<IAuthor>("AuthorSchema", authorSchema )
-
-// 4. Middleware para conexión JSON =============================================================
-app.use(express.json());
-
-// 5. Controladores =============================================================================
 const getAuthors =  async (req: Request, resp: Response<QueryResponse>):Promise<any> => {
   try {
     const authors = await AuthorModel.find()
@@ -130,30 +101,5 @@ const deleteAuthor = async (req: Request, resp: Response): Promise<any> => {
     })
    }
 }
-// 6. Rutas =====================================================================================
 
-app.get("/api/authors", getAuthors)
-app.post("/api/authors", createAuthor)
-app.patch("/api/authors/:id", updateAuthor)
-app.delete("/api/authors/:id", deleteAuthor)
-
-
-
-// 7. Inicio del servidor ======================================================================
-const startServer = async () => {
-  try {
-    await connectMongoDB();
-    console.log('📦 Connected to MongoDB successfully')
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`🔗 http://localhost:${PORT}/api/authors`);
-    });
-  } catch (error:unknown) {
-    const errMessage = error instanceof Error ? error.message : "Unknown error";
-    console.error(`❌ Fatal startup error: ${errMessage}`);
-    process.exit(1);
-  };
-};
-startServer()
-
-
+export {getAuthors, createAuthor, updateAuthor, deleteAuthor }
